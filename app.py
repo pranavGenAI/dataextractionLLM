@@ -104,20 +104,20 @@ def generate_content(image):
 
 def main():
     st.title("Insurance Data Extraction")
-    col1, col2, col3 = st.columns([4, 1, 4])
-
-    # Creating tabs for Document and System views
     tabs = st.tabs(["Document", "System"])
 
     # Document tab
-    with tabs[0]:  # Document tab only
+    with tabs[0]:  # Only within Document tab
+        col1, col2, col3 = st.columns([4, 1, 4])
         generated_text = ""
-        
+
         with col1:
-            # File uploader for multiple images (only within Document tab)
-            uploaded_images = st.file_uploader("", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
-            
-            # Apply custom CSS to hide the class
+            # File uploader for multiple images, specific to Document tab only
+            uploaded_images = st.file_uploader(
+                "Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed"
+            )  
+
+            # Apply custom CSS for styling
             st.markdown(
                 """
                 <style>
@@ -133,26 +133,24 @@ def main():
                 unsafe_allow_html=True
             )
 
+            # Display uploaded images and data extraction button
             if uploaded_images:
                 for uploaded_image in uploaded_images:
                     # Convert uploaded image to PIL image object
                     image = PIL.Image.open(uploaded_image)
 
-                    # Determine button label based on number of uploaded images
-                    if len(uploaded_images) > 1:
-                        button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}"
-                    else:
-                        button_label = "Extract data"
+                    # Button label based on number of images
+                    button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
 
-                    # Button to classify appeal
+                    # Extract data button and result display
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
-                            # Generate content using the image
-                            generated_text = generate_content(image)
+                            generated_text = generate_content(image)  # Generate content from image
 
                     st.image(uploaded_image, caption="", use_column_width=True)
 
         with col3:
+            # Display generated text if available
             if generated_text:
                 st.markdown(
                     f"""
@@ -167,8 +165,8 @@ def main():
 
     # System tab
     with tabs[1]:  # System tab content
-        # Placeholder for future System tab content
         st.write("System tab content goes here.")
+
 if __name__ == "__main__":
     if st.session_state.logged_in:
         col1, col2, col3 = st.columns([10, 10, 1.5])
