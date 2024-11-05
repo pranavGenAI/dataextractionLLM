@@ -7,14 +7,14 @@ import json
 from uuid import uuid4  # To generate unique IDs for each case
 
 # Set page title, icon, and dark theme
-st.set_page_config(page_title="State Release Data Extraction", page_icon=">", layout="wide")
+st.set_page_config(page_title="Invoice Data Processing", page_icon=">", layout="wide")
 
 # CSS for styling
 st.markdown(
     """
     <style>
     .stButton button {
-        background: linear-gradient(120deg,#FF007F, #A020F0 100%) !important;
+        background: linear-gradient(120deg, #FF007F, #A020F0 100%) !important;
         color: white !important;
     }
     body {
@@ -25,10 +25,23 @@ st.markdown(
         color: white;
         background-color: #2E2E2E;
     }
+    @import url('https://fonts.googleapis.com/css2?family=Graphik:wght@400;700&display=swap');
+    header {
+        background-color: #660094 !important;
+        padding: 10px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .logo {
+        height: 30px;
+        width: auto;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # Initialize session state
 if "logged_in" not in st.session_state:
@@ -50,9 +63,7 @@ def hash_password(password):
 
 # Define users and hashed passwords
 users = {
-    "ankur.d.shrivastav": hash_password("ankur123"),
-    "sashank.vaibhav.allu": hash_password("sashank123"),
-    "shivananda.mallya": hash_password("shiv123"),
+    "ritwick.das": hash_password("ritwick123"),
     "pranav.baviskar": hash_password("pranav123")
 }
 
