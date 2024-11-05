@@ -5,6 +5,7 @@ import time
 import hashlib
 import json
 import pandas as pd
+from fuzzywuzzy import fuzz  # Import the fuzzy matching function
 # Set page title, icon, and dark theme
 st.set_page_config(page_title="Invoice Data Processing", page_icon=">", layout="wide")
 st.markdown(
