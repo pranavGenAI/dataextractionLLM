@@ -8,4 +8,5 @@ pymupdf
 pytesseract
 opencv-python
 pdf2image
+openpyxl
 PyPDF2
