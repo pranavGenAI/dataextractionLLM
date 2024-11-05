@@ -194,26 +194,36 @@ def main():
                         # Prepare keys and values for the editable table
                         keys = list(extracted_data.keys())
                         values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
-                        editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
-                        
-                        # Create a new DataFrame for display
-                        editable_df = pd.DataFrame({
-                            'Keys': keys,
-                            'Values from Excel': values_from_excel,
-                            'Extracted Information': editable_values
-                        })
 
-                        # Create an editable table
-                        updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+                        # Ensure the lengths match before creating the DataFrame
+                        if len(keys) == len(values_from_excel):
+                            editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
+                            
+                            # Create a new DataFrame for display
+                            editable_df = pd.DataFrame({
+                                'Keys': keys,
+                                'Values from Excel': values_from_excel,
+                                'Extracted Information': editable_values
+                            })
 
-                        # Display the updated values (if needed)
-                        st.write("Updated Values:")
-                        st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
+                            # Create an editable table
+                            updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+
+                            # Display the updated values (if needed)
+                            st.write("Updated Values:")
+                            st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
+                        else:
+                            st.error("Mismatch in the number of keys and values. Please check the extracted data.")
+                    else:
+                        st.warning(f"No data found for contract number: {contract_number}")
+                else:
+                    st.warning("Contract number not found in the Excel file.")
 
             except json.JSONDecodeError as e:
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
                 
 if __name__ == "__main__":
     if st.session_state.logged_in:
