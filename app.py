@@ -101,71 +101,74 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-
 def main():
     st.title("Insurance Data Extraction")
-    tabs = st.tabs(["Document", "System"])
-    col1, col2, col3 = st.columns([4, 1, 4])
+    col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
+
     with col1:
-        
+        # Place tabs within col1
+        tabs = st.tabs(["Document", "System"])
+
         # Document tab
         with tabs[0]:  # Only within Document tab
             generated_text = ""
+            
+            # File uploader for multiple images, specific to Document tab only
+            uploaded_images = st.file_uploader(
+                "Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed"
+            )  
 
-                # File uploader for multiple images, specific to Document tab only
-                uploaded_images = st.file_uploader(
-                    "Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed"
-                )  
+            # Apply custom CSS for styling
+            st.markdown(
+                """
+                <style>
+                .st-emotion-cache-fis6aj.e1b2p2ww10 {
+                    background-color: #F0F0F0;
+                    color: black;                
+                }
+                body {
+                    background-color: white;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
-                # Apply custom CSS for styling
-                st.markdown(
-                    """
-                    <style>
-                    .st-emotion-cache-fis6aj.e1b2p2ww10 {
-                        background-color: #F0F0F0;
-                        color: black;                
-                    }
-                    body {
-                        background-color: white;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
+            # Display uploaded images and data extraction button
+            if uploaded_images:
+                for uploaded_image in uploaded_images:
+                    # Convert uploaded image to PIL image object
+                    image = PIL.Image.open(uploaded_image)
 
-                # Display uploaded images and data extraction button
-                if uploaded_images:
-                    for uploaded_image in uploaded_images:
-                        # Convert uploaded image to PIL image object
-                        image = PIL.Image.open(uploaded_image)
+                    # Button label based on number of images
+                    button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
 
-                        # Button label based on number of images
-                        button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
+                    # Extract data button and result display
+                    if st.button(button_label):
+                        with st.spinner("Evaluating..."):
+                            generated_text = generate_content(image)  # Generate content from image
 
-                        # Extract data button and result display
-                        if st.button(button_label):
-                            with st.spinner("Evaluating..."):
-                                generated_text = generate_content(image)  # Generate content from image
-
-                        st.image(uploaded_image, caption="", use_column_width=True)
-
-            with col3:
-                # Display generated text if available
-                if generated_text:
-                    st.markdown(
-                        f"""
-                        <div class="generated-text-box">
-                            <h3>Extraction Result:</h3>
-                            <p>{generated_text}</p>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                    st.markdown("***")
+                    st.image(uploaded_image, caption="", use_column_width=True)
 
         # System tab
         with tabs[1]:  # System tab content
             st.write("System tab content goes here.")
+
+    # Display extraction result in col3, separate from col1
+    with col3:
+        # Display generated text if available
+        if generated_text:
+            st.markdown(
+                f"""
+                <div class="generated-text-box">
+                    <h3>Extraction Result:</h3>
+                    <p>{generated_text}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            st.markdown("***")
+
 
 if __name__ == "__main__":
     if st.session_state.logged_in:
