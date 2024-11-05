@@ -116,16 +116,23 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
+def normalize_string(s):
+    """Normalize the input string by stripping whitespace, converting to lowercase,
+    removing special characters, and reducing multiple spaces to a single space."""
+    if s is None:
+        return ""
+    return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', '', s.strip().lower()))
+
 def generate_compare(extracted_values, values_from_excel, keys_of_interest):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        # Convert values to strings before stripping
-        extracted_value_str = str(extracted_value).strip() if extracted_value is not None else ""
-        excel_value_str = str(excel_value).strip() if excel_value is not None else ""
-        
-        # Use fuzzy matching to compare extracted values with Excel values
-        similarity_score = fuzz.ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 80 else "No"  # Adjust threshold as necessary
+        # Normalize both extracted and Excel values
+        extracted_value_str = normalize_string(extracted_value)
+        excel_value_str = normalize_string(excel_value)
+
+        # Use fuzzy matching to compare normalized extracted values with normalized Excel values
+        similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
+        comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
     return comparison_result
 
 def main():
