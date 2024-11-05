@@ -124,19 +124,14 @@ def normalize_string(s):
         return ""
     return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', '', s.strip().lower()))
 
-def normalize_string(s):
-    """Normalize the input string by stripping whitespace, converting to lowercase,
-    removing special characters, and reducing multiple spaces to a single space."""
-    if s is None:
-        return ""
-    return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', '', s.strip().lower()))
-
 def generate_compare(extracted_values, values_from_excel, keys_of_interest):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
+        # Convert values to strings before normalization and stripping
         extracted_value_str = normalize_string(str(extracted_value) if extracted_value is not None else "")
         excel_value_str = normalize_string(str(excel_value) if excel_value is not None else "")
         
+        # Use fuzzy matching to compare normalized extracted values with normalized Excel values
         similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
         comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
     return comparison_result
@@ -146,11 +141,13 @@ def main():
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
 
     generated_text = ""
-    
+
     with col1:
+        # Place tabs within col1
         tabs = st.tabs(["📄 Document", "⚙️ System"])
 
-        with tabs[0]:  # Document tab
+        # Document tab
+        with tabs[0]:  # Only within Document tab
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
 
             if uploaded_images:
@@ -164,22 +161,27 @@ def main():
 
                     st.image(uploaded_image, caption="", use_column_width=True)
 
-        with tabs[1]:  # System tab
-            excel_file = "Invoice processing.xlsx"
+        # System tab
+        with tabs[1]:  # System tab content
+            excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
                 df = pd.read_excel(excel_file)  # Read the Excel file
                 st.dataframe(df)  # Display the data as a table
             except Exception as e:
                 st.error(f"Error reading the Excel file: {e}")
 
+    # Display extraction result in col3, separate from col1
     with col3:
         if generated_text:
             try:
+                # Extract and parse the JSON response
                 json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
-                extracted_data = json.loads(json_str)
+                extracted_data = json.loads(json_str)  # Use json.loads to parse
 
+                # Extract contract number
                 contract_number = extracted_data.get("Contract Number", "")
                 
+                # Find the row in the Excel DataFrame for the contract number
                 if not df.empty and contract_number:
                     contract_row = df[df['Contract Number'] == contract_number]
 
@@ -193,39 +195,50 @@ def main():
                             "Contract Value"
                         ]
 
+                        # Extract values for the specified keys from the JSON and Excel DataFrame
                         values_from_excel = []
                         extracted_values = []
 
                         for key in keys_of_interest:
-                            extracted_values.append(extracted_data.get(key, ""))
-                            values_from_excel.append(contract_row.iloc[0][key] if key in contract_row.columns else "")
+                            if key in extracted_data:
+                                extracted_values.append(extracted_data[key])  # From extracted data
+                            else:
+                                extracted_values.append("")  # Placeholder if the key is not found
 
+                            if key in contract_row.columns:
+                                values_from_excel.append(contract_row.iloc[0][key])  # From Excel
+                            else:
+                                values_from_excel.append("")  # Placeholder if the key is not found
+
+                        # Create a new DataFrame for display
                         editable_df = pd.DataFrame({
                             'Keys': keys_of_interest,
                             'Values from System': values_from_excel,
-                            'Extracted Information': extracted_values,
+                            'Extracted Information': extracted_values
                         })
 
-                        # Generate comparison results
+                        # Generate comparison results using fuzzy logic
                         comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
 
-                        # Initialize checkbox states
+                        # Initialize checkbox states if not already set
                         if 'checkbox_states' not in st.session_state:
                             st.session_state.checkbox_states = {key: (comparison_results[key] == "Yes") for key in keys_of_interest}
 
-                        # Add checkbox states to the DataFrame
-                        editable_df['Match'] = [st.session_state.checkbox_states[key] for key in keys_of_interest]
+                        # Add checkboxes directly to the DataFrame
+                        editable_df['Match'] = [
+                            st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states[key], key=f"checkbox_{key}") 
+                            for key in keys_of_interest
+                        ]
 
-                        # Display DataFrame with checkboxes
-                        for idx, key in enumerate(keys_of_interest):
-                            editable_df.at[idx, 'Match'] = st.checkbox(f"Match for {key}", value=editable_df['Match'][idx], key=f"checkbox_{key}")
+                        # Display the DataFrame with checkboxes
+                        st.dataframe(editable_df, use_container_width=True)
 
-                        # Update checkbox states in session state
-                        for idx, key in enumerate(keys_of_interest):
-                            st.session_state.checkbox_states[key] = editable_df['Match'][idx]
+                        # Update checkbox states based on user input
+                        for key in keys_of_interest:
+                            st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
-                        st.dataframe(editable_df.drop(columns=['Match']), use_container_width=True)  # Drop Match column from displayed dataframe
-                        st.json(comparison_results)  # Display comparison results
+                        # Display comparison results as JSON
+                        st.json(comparison_results)  # Display the comparison results
 
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
@@ -236,6 +249,7 @@ def main():
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+                
 if __name__ == "__main__":
     if st.session_state.logged_in:
         col1, col2, col3 = st.columns([10, 10, 1.5])
