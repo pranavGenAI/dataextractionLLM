@@ -174,9 +174,27 @@ def main():
         # Display generated text if available
         if generated_text:
             try:
-                # Print the generated text for debugging
+                                # Display generated text for debugging
                 st.write("Generated text:", generated_text)  
-
+                
+                # Extract the JSON part from the generated text
+                json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
+                json_str = json_str.replace("```json", "").replace("```", "").strip()  # Remove formatting
+                
+                try:
+                    # Parse the JSON response into a dictionary
+                    extracted_data = json.loads(json_str)  # Use json.loads to parse
+                
+                    # Display extracted data in bullet format
+                    st.markdown("### Extraction Result:")
+                    for key in ["Vendor/Merchant", "Original Contract Start Date", "Original Contract End Date", "New Contract Start Date", "New Contract End Date", "Contract Value"]:
+                        if key in extracted_data:
+                            st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
+                
+                except json.JSONDecodeError as e:
+                    st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
                 # Extract the JSON part from the generated text
                 json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
                 json_str = json_str.replace("```json", "").replace("```", "").strip()  # Remove formatting
