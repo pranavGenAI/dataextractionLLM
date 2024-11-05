@@ -159,7 +159,7 @@ def main():
         with tabs[1]:  # System tab content
             #st.write("System tab content goes here.")
             # Load the Excel file and display the table
-            excel_file = "Invoice Processing.xlsx"  # Ensure this file is in your working directory
+            excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
                 df = pd.read_excel(excel_file)  # Read the Excel file
                 st.dataframe(df)  # Display the data as a table
