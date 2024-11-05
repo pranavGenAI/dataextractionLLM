@@ -110,10 +110,11 @@ def main():
     tabs = st.tabs(["Document", "System"])
 
     # Document tab
-    with tabs[1]:
+    with tabs[0]:  # Document tab only
         generated_text = ""
+        
         with col1:
-            # File uploader for multiple images
+            # File uploader for multiple images (only within Document tab)
             uploaded_images = st.file_uploader("", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
             
             # Apply custom CSS to hide the class
@@ -150,7 +151,7 @@ def main():
                             generated_text = generate_content(image)
 
                     st.image(uploaded_image, caption="", use_column_width=True)
-        
+
         with col3:
             if generated_text:
                 st.markdown(
@@ -164,6 +165,10 @@ def main():
                 )
                 st.markdown("***")
 
+    # System tab
+    with tabs[1]:  # System tab content
+        # Placeholder for future System tab content
+        st.write("System tab content goes here.")
 if __name__ == "__main__":
     if st.session_state.logged_in:
         col1, col2, col3 = st.columns([10, 10, 1.5])
