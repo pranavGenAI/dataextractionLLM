@@ -175,7 +175,6 @@ def main():
         if generated_text:
             try:
                                 # Display generated text for debugging
-                st.write("Generated text:", generated_text)  
                 
                 # Extract the JSON part from the generated text
                 json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
@@ -187,7 +186,7 @@ def main():
                 
                     # Display extracted data in bullet format
                     st.markdown("### Extraction Result:")
-                    for key in ["Vendor/Merchant", "Original Contract Start Date", "Original Contract End Date", "New Contract Start Date", "New Contract End Date", "Contract Value"]:
+                    for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present", "Original Contract Start Date", "Original Contract End Date", "New Contract Start Date", "New Contract End Date", "Contract Value"]:
                         if key in extracted_data:
                             st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
                 
@@ -203,8 +202,7 @@ def main():
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
 
                 # Print the extracted data for debugging
-                st.write("Extracted data:", extracted_data)  
-
+                
                 # Extract contract number from the generated JSON
                 contract_number = extracted_data.get("Contract Number", "")
                 
