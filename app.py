@@ -87,10 +87,12 @@ def generate_content(image):
             print("Model definition")
             model = genai.GenerativeModel('gemini-1.5-pro')
             prompt = """You have been given invoice document as input. Perform the following validations:
-            1. Check if invoice date is within COVID period (Jan 2020 - July 2020 - July 2023)
+            1. Check if invoice date is within COVID period (Jan 2020 to July 2023) if the document is invoice
             2. Check if the department in To is NYS department of health
             3. Extract vendor name
-            
+            4. Validate if contractor signature is present
+            5. Validate if officer signature is present 
+            6. Extract contract start and end date
             """
             # Generate content using the image
             print("Model generate")
