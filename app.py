@@ -125,7 +125,7 @@ def generate_compare(extracted_values, values_from_excel, keys_of_interest):
         
         # Use fuzzy matching to compare extracted values with Excel values
         similarity_score = fuzz.ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 80 else "No"  # Adjust threshold as necessary
+        comparison_result[key] = "Yes" if similarity_score >= 60 else "No"  # Adjust threshold as necessary
     return comparison_result
 
 def main():
