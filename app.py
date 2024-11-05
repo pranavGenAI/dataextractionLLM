@@ -4,8 +4,9 @@ import google.generativeai as genai
 import time
 import hashlib
 import json
+import pandas as pd
 # Set page title, icon, and dark theme
-st.set_page_config(page_title="Insurance Data Extraction", page_icon=">", layout="wide")
+st.set_page_config(page_title="Invoice Data Processing", page_icon=">", layout="wide")
 st.markdown(
     """
     <style>
@@ -87,14 +88,15 @@ def generate_content(image):
             print("Model definition")
             model = genai.GenerativeModel('gemini-1.5-pro')
             prompt = """You have been given contract document as input. Perform the following validations and return short result:
-            1. Check if date is within COVID period (Jan 2020 to July 2023) if the document is invoice
-            2. Check if the department in To is NYS department of health
-            3. Extract vendor name
-            4. Validate if contractor signature is present
-            5. Validate if officer signature is present 
-            6. Extract Original contract start and end date
-            7. Extract New contract start and end date
-            8. Contract Value 
+            1. Contractor Number 
+            2. Check if date is within COVID period (Jan 2020 to July 2023) if the document is invoice
+            3. Check if the department in To is NYS department of health
+            4. Extract vendor name
+            5. Validate if contractor signature is present
+            6. Validate if officer signature is present 
+            7. Extract Original contract start and end date
+            8. Extract New contract start and end date
+            9. Contract Value 
             """
             # Generate content using the image
             print("Model generate")
@@ -155,7 +157,14 @@ def main():
 
         # System tab
         with tabs[1]:  # System tab content
-            st.write("System tab content goes here.")
+            #st.write("System tab content goes here.")
+            # Load the Excel file and display the table
+            excel_file = "Invoice Processing.xlsx"  # Ensure this file is in your working directory
+            try:
+                df = pd.read_excel(excel_file)  # Read the Excel file
+                st.dataframe(df)  # Display the data as a table
+            except Exception as e:
+                st.error(f"Error reading the Excel file: {e}")
 
     # Display extraction result in col3, separate from col1
     with col3:
