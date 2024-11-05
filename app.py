@@ -186,7 +186,7 @@ def main():
                 
                     # Display extracted data in bullet format
                     st.markdown("### Extraction Result:")
-                    for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present", "Original Contract Start Date", "Original Contract End Date", "New Contract Start Date", "New Contract End Date", "Contract Value"]:
+                    for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
                         if key in extracted_data:
                             st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
                 
