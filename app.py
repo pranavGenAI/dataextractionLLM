@@ -115,7 +115,7 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-def generate_compare(extracted_values, values_from_excel):
+def generate_compare(extracted_values, values_from_excel, keys_of_interest):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
         # Use fuzzy matching to compare extracted values with Excel values
@@ -208,7 +208,7 @@ def main():
                         })
 
                         # Generate comparison results using fuzzy logic
-                        comparison_results = generate_compare(extracted_values, values_from_excel)
+                        comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
 
                         # Add checkboxes to the DataFrame
                         editable_df['Match'] = [st.checkbox(f"Match for {key}", value=(comparison_results[key] == "Yes")) for key in keys_of_interest]
