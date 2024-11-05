@@ -115,11 +115,12 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-
 def generate_compare(extracted_values, values_from_excel):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        comparison_result[key] = "Yes" if extracted_value == excel_value else "No"
+        # Use fuzzy matching to compare extracted values with Excel values
+        similarity_score = fuzz.ratio(extracted_value.strip(), excel_value.strip())
+        comparison_result[key] = "Yes" if similarity_score >= 80 else "No"  # Adjust threshold as necessary
     return comparison_result
 
 def main():
@@ -206,7 +207,7 @@ def main():
                             'Extracted Information': extracted_values
                         })
 
-                        # Generate comparison results
+                        # Generate comparison results using fuzzy logic
                         comparison_results = generate_compare(extracted_values, values_from_excel)
 
                         # Add checkboxes to the DataFrame
