@@ -133,7 +133,7 @@ def generate_compare(extracted_values, values_from_excel, keys_of_interest):
         
         # Use fuzzy matching to compare normalized extracted values with normalized Excel values
         similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
+        comparison_result[key] = "Yes" if similarity_score >= 60 else "No"  # Adjust threshold as necessary
     return comparison_result
     
 def main():
@@ -147,9 +147,10 @@ def main():
         tabs = st.tabs(["📄 Document", "⚙️ System"])
 
         # Document tab
-        with tabs[0]:  # Only within Document tab
+        with tabs[0]:
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
 
+            # Display uploaded images and data extraction button
             if uploaded_images:
                 for uploaded_image in uploaded_images:
                     image = PIL.Image.open(uploaded_image)
@@ -162,7 +163,7 @@ def main():
                     st.image(uploaded_image, caption="", use_column_width=True)
 
         # System tab
-        with tabs[1]:  # System tab content
+        with tabs[1]:
             excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
                 df = pd.read_excel(excel_file)  # Read the Excel file
@@ -230,12 +231,12 @@ def main():
                             for key in keys_of_interest
                         ]
 
-                        # Display the DataFrame with checkboxes
-                        st.dataframe(editable_df, use_container_width=True)
-
                         # Update checkbox states based on user input
                         for key in keys_of_interest:
                             st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
+
+                        # Display the DataFrame with checkboxes
+                        st.dataframe(editable_df, use_container_width=True)
 
                         # Display comparison results as JSON
                         st.json(comparison_results)  # Display the comparison results
@@ -249,6 +250,7 @@ def main():
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
                 
 if __name__ == "__main__":
     if st.session_state.logged_in:
