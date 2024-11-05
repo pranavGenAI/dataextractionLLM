@@ -244,10 +244,10 @@ def main():
                         })
 
                         # Create an editable table
-                        updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+                        #updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
 
                         # Display the updated values (if needed)
-                        st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
+                        #st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
                 else:
