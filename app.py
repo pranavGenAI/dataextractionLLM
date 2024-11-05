@@ -136,6 +136,16 @@ def generate_compare(extracted_values, values_from_excel, keys_of_interest):
         comparison_result[key] = "Yes" if similarity_score >= 60 else "No"  # Adjust threshold as necessary
     return comparison_result
     
+def generate_compare(extracted_values, values_from_excel, keys_of_interest):
+    comparison_result = {}
+    for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
+        extracted_value_str = normalize_string(str(extracted_value) if extracted_value is not None else "")
+        excel_value_str = normalize_string(str(excel_value) if excel_value is not None else "")
+        
+        similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
+        comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
+    return comparison_result
+
 def main():
     st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
@@ -211,27 +221,26 @@ def main():
                             else:
                                 values_from_excel.append("")  # Placeholder if the key is not found
 
-                        # Create a new DataFrame for display
+                        # Generate comparison results using fuzzy logic
+                        comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
+
+                        # Initialize checkbox states in session_state if not already done
+                        if 'checkbox_states' not in st.session_state:
+                            st.session_state.checkbox_states = {key: (comparison_results[key] == "Yes") for key in keys_of_interest}
+
+                        # Add checkboxes directly to the DataFrame
                         editable_df = pd.DataFrame({
                             'Keys': keys_of_interest,
                             'Values from System': values_from_excel,
                             'Extracted Information': extracted_values
                         })
 
-                        # Generate comparison results using fuzzy logic
-                        comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
-
-                        # Initialize checkbox states if not already set
-                        if 'checkbox_states' not in st.session_state:
-                            st.session_state.checkbox_states = {key: (comparison_results[key] == "Yes") for key in keys_of_interest}
-
-                        # Add checkboxes directly to the DataFrame
                         editable_df['Match'] = [
                             st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states[key], key=f"checkbox_{key}") 
                             for key in keys_of_interest
                         ]
 
-                        # Update checkbox states based on user input
+                        # Update session state based on user input
                         for key in keys_of_interest:
                             st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
@@ -250,7 +259,6 @@ def main():
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-
                 
 if __name__ == "__main__":
     if st.session_state.logged_in:
