@@ -86,7 +86,12 @@ def generate_content(image):
             # Initialize the GenerativeModel
             print("Model definition")
             model = genai.GenerativeModel('gemini-1.5-pro')
-            prompt = """You have been given insurance certificate as input. Give me the list of names of providers covered under the policy (It should be name of individual/s and not company), the policy numbers (add prefix if any) and policy expiration dates. Also, check if any dollar amount is mentioned in the overall image. If yes then return Yes and if no then return No. Format it better"""
+            prompt = """You have been given invoice document as input. Perform the following validations:
+            1. Check if invoice date is within COVID period (Jan 2020 - July 2020 - July 2023)
+            2. Check if the department in To is NYS department of health
+            3. Extract vendor name
+            
+            """
             # Generate content using the image
             print("Model generate")
             response = model.generate_content([prompt, image], stream=True)
@@ -102,7 +107,7 @@ def generate_content(image):
     # Return None if all retries fail
     return None
 def main():
-    st.title("Insurance Data Extraction")
+    st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
 
     with col1:
