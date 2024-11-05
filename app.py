@@ -42,6 +42,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Header with logo, placed at the very beginning to ensure it appears at the top
+st.markdown(
+    """
+    <header tabindex="-1" data-testid="stHeader">
+        <div class="header-content">
+            <img src="https://www.vgen.it/wp-content/uploads/2021/04/logo-accenture-ludo.png" class="logo" alt="Logo">
+        </div>
+    </header>
+    """,
+    unsafe_allow_html=True
+)
 
 # Initialize session state
 if "logged_in" not in st.session_state:
@@ -202,18 +213,6 @@ st.markdown(
         color: black;
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Header with logo
-st.markdown(
-    """
-    <header tabindex="-1" data-testid="stHeader">
-        <div class="header-content">
-            <img src="https://www.vgen.it/wp-content/uploads/2021/04/logo-accenture-ludo.png" class="logo" alt="Logo">
-        </div>
-    </header>
     """,
     unsafe_allow_html=True
 )
