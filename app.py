@@ -119,13 +119,14 @@ def main():
     st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
 
+    generated_text = ""
+
     with col1:
         # Place tabs within col1
         tabs = st.tabs(["📄 Document", "⚙️ System"])
 
         # Document tab
         with tabs[0]:  # Only within Document tab
-            generated_text = ""
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
             st.markdown(
                 """
@@ -160,7 +161,6 @@ def main():
 
         # System tab
         with tabs[1]:  # System tab content
-            #st.write("System tab content goes here.")
             # Load the Excel file and display the table
             excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
@@ -171,18 +171,37 @@ def main():
 
     # Display extraction result in col3, separate from col1
     with col3:
-        # Display generated text if available
+        # Create a DataFrame for the editable table
         if generated_text:
-            st.markdown(
-                f"""
-                <div class="generated-text-box">
-                    <h3>Extraction Result:</h3>
-                    <p>{generated_text}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            st.markdown("***")
+            # Parse the JSON response into a dictionary
+            extracted_data = eval(generated_text)  # Convert string representation of dict to actual dict
+
+            # Extract contract number from the generated JSON
+            contract_number = extracted_data.get("Contract Number", "")
+            
+            # Find the row in the Excel DataFrame for the contract number
+            if not df.empty and contract_number:
+                contract_row = df[df['Contract Number'] == contract_number]
+
+                if not contract_row.empty:
+                    # Prepare keys and values for the editable table
+                    keys = list(extracted_data.keys())
+                    values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
+                    editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
+                    
+                    # Create a new DataFrame for display
+                    editable_df = pd.DataFrame({
+                        'Keys': keys,
+                        'Values from Excel': values_from_excel,
+                        'Extracted Information': editable_values
+                    })
+
+                    # Create an editable table
+                    updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+
+                    # Display the updated values (if needed)
+                    st.write("Updated Values:")
+                    st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
 
 
 if __name__ == "__main__":
