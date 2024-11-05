@@ -206,6 +206,19 @@ def main():
 
             except json.JSONDecodeError:
                 st.error("Failed to parse generated text as JSON. Please check the output.")
+    with col3:
+        # Display generated text if available
+        if generated_text:
+            st.markdown(
+                f"""
+                <div class="generated-text-box">
+                    <h3>Extraction Result:</h3>
+                    <p>{generated_text}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            st.markdown("***")
 
 if __name__ == "__main__":
     if st.session_state.logged_in:
