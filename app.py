@@ -195,35 +195,44 @@ def main():
                     contract_row = df[df['Contract Number'] == contract_number]
 
                     if not contract_row.empty:
-                        # Prepare keys and values for the editable table
-                        keys = list(extracted_data.keys())
-                        values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
+                        # Prepare keys of interest
+                        keys_of_interest = [
+                            "Vendor/Merchant",
+                            "Original Contract Start Date",
+                            "Original Contract End Date",
+                            "New Contract Start Date",
+                            "New Contract End Date",
+                            "Contract Value"
+                        ]
 
-                        # Debugging: print lengths of keys and values
-                        st.write("Keys:", keys)
-                        st.write("Values from Excel:", values_from_excel)
-                        st.write("Length of keys:", len(keys))
-                        st.write("Length of values from Excel:", len(values_from_excel))
+                        # Extract values for the specified keys from the JSON and Excel DataFrame
+                        values_from_excel = []
+                        extracted_values = []
 
-                        # Ensure the lengths match before creating the DataFrame
-                        if len(keys) == len(values_from_excel):
-                            editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
-                            
-                            # Create a new DataFrame for display
-                            editable_df = pd.DataFrame({
-                                'Keys': keys,
-                                'Values from Excel': values_from_excel,
-                                'Extracted Information': editable_values
-                            })
+                        for key in keys_of_interest:
+                            if key in extracted_data:
+                                extracted_values.append(extracted_data[key])  # From extracted data
+                            else:
+                                extracted_values.append("")  # Placeholder if the key is not found
 
-                            # Create an editable table
-                            updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+                            if key in contract_row.columns:
+                                values_from_excel.append(contract_row.iloc[0][key])  # From Excel
+                            else:
+                                values_from_excel.append("")  # Placeholder if the key is not found
 
-                            # Display the updated values (if needed)
-                            st.write("Updated Values:")
-                            st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
-                        else:
-                            st.error(f"Mismatch in the number of keys ({len(keys)}) and values ({len(values_from_excel)}). Please check the extracted data.")
+                        # Create a new DataFrame for display
+                        editable_df = pd.DataFrame({
+                            'Keys': keys_of_interest,
+                            'Values from Excel': values_from_excel,
+                            'Extracted Information': extracted_values
+                        })
+
+                        # Create an editable table
+                        updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+
+                        # Display the updated values (if needed)
+                        st.write("Updated Values:")
+                        st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
                 else:
@@ -233,7 +242,6 @@ def main():
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-
                 
 if __name__ == "__main__":
     if st.session_state.logged_in:
