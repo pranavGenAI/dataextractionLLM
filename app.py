@@ -105,13 +105,13 @@ def generate_content(image):
 def main():
     st.title("Insurance Data Extraction")
     tabs = st.tabs(["Document", "System"])
-
+    col1, col2, col3 = st.columns([4, 1, 4])
+    with col1:
+        
     # Document tab
     with tabs[0]:  # Only within Document tab
-        col1, col2, col3 = st.columns([4, 1, 4])
         generated_text = ""
 
-        with col1:
             # File uploader for multiple images, specific to Document tab only
             uploaded_images = st.file_uploader(
                 "Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed"
