@@ -173,36 +173,39 @@ def main():
     with col3:
         # Create a DataFrame for the editable table
         if generated_text:
-            # Parse the JSON response into a dictionary
-            extracted_data = eval(generated_text)  # Convert string representation of dict to actual dict
+            try:
+                # Parse the JSON response into a dictionary safely
+                extracted_data = json.loads(generated_text)  # Use json.loads instead of eval
 
-            # Extract contract number from the generated JSON
-            contract_number = extracted_data.get("Contract Number", "")
-            
-            # Find the row in the Excel DataFrame for the contract number
-            if not df.empty and contract_number:
-                contract_row = df[df['Contract Number'] == contract_number]
+                # Extract contract number from the generated JSON
+                contract_number = extracted_data.get("Contract Number", "")
+                
+                # Find the row in the Excel DataFrame for the contract number
+                if not df.empty and contract_number:
+                    contract_row = df[df['Contract Number'] == contract_number]
 
-                if not contract_row.empty:
-                    # Prepare keys and values for the editable table
-                    keys = list(extracted_data.keys())
-                    values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
-                    editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
-                    
-                    # Create a new DataFrame for display
-                    editable_df = pd.DataFrame({
-                        'Keys': keys,
-                        'Values from Excel': values_from_excel,
-                        'Extracted Information': editable_values
-                    })
+                    if not contract_row.empty:
+                        # Prepare keys and values for the editable table
+                        keys = list(extracted_data.keys())
+                        values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
+                        editable_values = [extracted_data[key] for key in keys]  # Get editable values from extracted data
+                        
+                        # Create a new DataFrame for display
+                        editable_df = pd.DataFrame({
+                            'Keys': keys,
+                            'Values from Excel': values_from_excel,
+                            'Extracted Information': editable_values
+                        })
 
-                    # Create an editable table
-                    updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+                        # Create an editable table
+                        updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
 
-                    # Display the updated values (if needed)
-                    st.write("Updated Values:")
-                    st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
+                        # Display the updated values (if needed)
+                        st.write("Updated Values:")
+                        st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
 
+            except json.JSONDecodeError:
+                st.error("Failed to parse generated text as JSON. Please check the output.")
 
 if __name__ == "__main__":
     if st.session_state.logged_in:
