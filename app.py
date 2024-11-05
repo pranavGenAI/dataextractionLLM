@@ -118,7 +118,7 @@ def main():
 
     with col1:
         # Place tabs within col1
-        tabs = st.tabs(["Document", "System"])
+        tabs = st.tabs(["📄 Document", "⚙️ System"])
 
         # Document tab
         with tabs[0]:  # Only within Document tab
