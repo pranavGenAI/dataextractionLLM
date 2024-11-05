@@ -119,13 +119,13 @@ def generate_content(image):
 def generate_compare(extracted_values, values_from_excel, keys_of_interest):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        # Convert values to strings before stripping
-        extracted_value_str = str(extracted_value).strip() if extracted_value is not None else ""
-        excel_value_str = str(excel_value).strip() if excel_value is not None else ""
+        # Normalize both values
+        extracted_value_str = str(extracted_value).strip().lower() if extracted_value else ""
+        excel_value_str = str(excel_value).strip().lower() if excel_value else ""
         
         # Use fuzzy matching to compare extracted values with Excel values
         similarity_score = fuzz.ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 60 else "No"  # Adjust threshold as necessary
+        comparison_result[key] = "Yes" if similarity_score >= 80 else "No"  # Adjust threshold as necessary
     return comparison_result
 
 def main():
