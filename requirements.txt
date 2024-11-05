@@ -1,0 +1,11 @@
+google-generativeai
+streamlit
+streamlit_extras
+torch
+Pillow
+transformers
+pymupdf
+pytesseract
+opencv-python
+pdf2image
+PyPDF2
