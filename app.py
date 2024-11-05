@@ -161,7 +161,6 @@ def main():
 
         # System tab
         with tabs[1]:  # System tab content
-            # Load the Excel file and display the table
             excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
                 df = pd.read_excel(excel_file)  # Read the Excel file
@@ -171,11 +170,18 @@ def main():
 
     # Display extraction result in col3, separate from col1
     with col3:
-        # Create a DataFrame for the editable table
+        # Display generated text if available
         if generated_text:
             try:
+                # Print the generated text for debugging
+                st.write("Generated text:", generated_text)  
+
+                # Extract the JSON part from the generated text
+                json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
+                json_str = json_str.replace("```json", "").replace("```", "").strip()  # Remove formatting
+
                 # Parse the JSON response into a dictionary safely
-                extracted_data = json.loads(generated_text)  # Use json.loads instead of eval
+                extracted_data = json.loads(json_str)  # Use json.loads to parse
 
                 # Extract contract number from the generated JSON
                 contract_number = extracted_data.get("Contract Number", "")
@@ -204,22 +210,11 @@ def main():
                         st.write("Updated Values:")
                         st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
 
-            except json.JSONDecodeError:
-                st.error("Failed to parse generated text as JSON. Please check the output.")
-    with col3:
-        # Display generated text if available
-        if generated_text:
-            st.markdown(
-                f"""
-                <div class="generated-text-box">
-                    <h3>Extraction Result:</h3>
-                    <p>{generated_text}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            st.markdown("***")
-
+            except json.JSONDecodeError as e:
+                st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
+                
 if __name__ == "__main__":
     if st.session_state.logged_in:
         col1, col2, col3 = st.columns([10, 10, 1.5])
