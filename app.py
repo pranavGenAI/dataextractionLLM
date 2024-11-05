@@ -115,6 +115,7 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
+
 def main():
     st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
@@ -183,6 +184,9 @@ def main():
                 # Parse the JSON response into a dictionary safely
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
 
+                # Print the extracted data for debugging
+                st.write("Extracted data:", extracted_data)  
+
                 # Extract contract number from the generated JSON
                 contract_number = extracted_data.get("Contract Number", "")
                 
@@ -194,6 +198,12 @@ def main():
                         # Prepare keys and values for the editable table
                         keys = list(extracted_data.keys())
                         values_from_excel = contract_row.iloc[0].tolist()  # Get the first row values as a list
+
+                        # Debugging: print lengths of keys and values
+                        st.write("Keys:", keys)
+                        st.write("Values from Excel:", values_from_excel)
+                        st.write("Length of keys:", len(keys))
+                        st.write("Length of values from Excel:", len(values_from_excel))
 
                         # Ensure the lengths match before creating the DataFrame
                         if len(keys) == len(values_from_excel):
@@ -213,7 +223,7 @@ def main():
                             st.write("Updated Values:")
                             st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
                         else:
-                            st.error("Mismatch in the number of keys and values. Please check the extracted data.")
+                            st.error(f"Mismatch in the number of keys ({len(keys)}) and values ({len(values_from_excel)}). Please check the extracted data.")
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
                 else:
