@@ -239,7 +239,7 @@ def main():
                         # Create a new DataFrame for display
                         editable_df = pd.DataFrame({
                             'Keys': keys_of_interest,
-                            'Values from Excel': values_from_excel,
+                            'Values from System': values_from_excel,
                             'Extracted Information': extracted_values
                         })
 
@@ -247,7 +247,6 @@ def main():
                         updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
 
                         # Display the updated values (if needed)
-                        st.write("Updated Values:")
                         st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
