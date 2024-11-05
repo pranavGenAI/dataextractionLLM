@@ -98,7 +98,7 @@ def generate_content(image):
             8. Extract New contract start and end date
             9. Contract Value 
 
-            Return a json with below keys: Contract Number, Within COVID: (Yes/No), Addressed to NYDOH: (Yes/No), Contractor Name, Contractor Signature Present: (Yes/No), Officer Signature Present: (Yes/No), Original Start Date, Original End Date, New Start Date, New End Date, Contract Value
+            Return a json with below keys: Contract Number, Within COVID: (Yes/No), Addressed to NYDOH: (Yes/No), Vendor/Merchant, Contractor Signature Present: (Yes/No), Officer Signature Present: (Yes/No), Original Contract Start Date, Original Contract End Date, New Contract Start Date, New Contract End Date, Contract Value
             If any of the above value is missing just return blank
             """
             # Generate content using the image
