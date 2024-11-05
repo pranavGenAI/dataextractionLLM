@@ -86,7 +86,7 @@ def generate_content(image):
             # Initialize the GenerativeModel
             print("Model definition")
             model = genai.GenerativeModel('gemini-1.5-pro')
-            prompt = """You have been given contract document as input. Perform the following validations and return only result:
+            prompt = """You have been given contract document as input. Perform the following validations and return short result:
             1. Check if date is within COVID period (Jan 2020 to July 2023) if the document is invoice
             2. Check if the department in To is NYS department of health
             3. Extract vendor name
