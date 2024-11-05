@@ -127,15 +127,15 @@ def normalize_string(s):
 def generate_compare(extracted_values, values_from_excel, keys_of_interest):
     comparison_result = {}
     for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        # Normalize both extracted and Excel values
-        extracted_value_str = normalize_string(extracted_value)
-        excel_value_str = normalize_string(excel_value)
-
+        # Convert values to strings before normalization and stripping
+        extracted_value_str = normalize_string(str(extracted_value) if extracted_value is not None else "")
+        excel_value_str = normalize_string(str(excel_value) if excel_value is not None else "")
+        
         # Use fuzzy matching to compare normalized extracted values with normalized Excel values
         similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
         comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
     return comparison_result
-
+    
 def main():
     st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
