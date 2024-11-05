@@ -110,7 +110,7 @@ def main():
     tabs = st.tabs(["Document", "System"])
 
     # Document tab
-    with tabs[0]:
+    with tabs[1]:
         generated_text = ""
         with col1:
             # File uploader for multiple images
