@@ -112,11 +112,7 @@ def main():
         # Document tab
         with tabs[0]:  # Only within Document tab
             generated_text = ""
-            
-            # File uploader for multiple images, specific to Document tab only
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
-
-            # Apply custom CSS for styling
             st.markdown(
                 """
                 <style>
