@@ -135,21 +135,24 @@ def main():
     generated_text = ""
     checkbox_states = {}
 
+    # Session state to maintain checkbox states
+    if 'checkbox_states' not in st.session_state:
+        st.session_state.checkbox_states = {}
+
     with col1:
         # Place tabs within col1
         tabs = st.tabs(["📄 Document", "⚙️ System"])
 
         # Document tab
-        with tabs[0]:  # Only within Document tab
-            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
-            # ... (existing markdown styling)
+        with tabs[0]:
+            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
 
             # Display uploaded images and data extraction button
             if uploaded_images:
                 for uploaded_image in uploaded_images:
                     image = PIL.Image.open(uploaded_image)
                     button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
-
+                    
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
                             generated_text = generate_content(image)  # Generate content from image
@@ -157,7 +160,7 @@ def main():
                     st.image(uploaded_image, caption="", use_column_width=True)
 
         # System tab
-        with tabs[1]:  # System tab content
+        with tabs[1]:
             excel_file = "Invoice processing.xlsx"  # Ensure this file is in your working directory
             try:
                 df = pd.read_excel(excel_file)  # Read the Excel file
@@ -165,86 +168,39 @@ def main():
             except Exception as e:
                 st.error(f"Error reading the Excel file: {e}")
 
-    # Display extraction result in col3, separate from col1
+    # Display extraction result in col3
     with col3:
         if generated_text:
+            # Assuming JSON extraction process happens here
+            json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
             try:
-                # Extract and parse the JSON response
-                json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
-                extracted_data = json.loads(json_str)  # Use json.loads to parse
-
-                # Extract contract number
-                contract_number = extracted_data.get("Contract Number", "")
+                extracted_data = json.loads(json_str)
+                keys_of_interest = ["Vendor/Merchant", "Original Contract Start Date", "Original Contract End Date", "New Contract Start Date", "New Contract End Date", "Contract Value"]
                 
-                # Find the row in the Excel DataFrame for the contract number
-                if not df.empty and contract_number:
-                    contract_row = df[df['Contract Number'] == contract_number]
+                # Prepare a new DataFrame with checkboxes
+                editable_df = pd.DataFrame({
+                    'Keys': keys_of_interest,
+                    'Values from System': [extracted_data.get(key, "") for key in keys_of_interest],
+                    'Extracted Information': [extracted_data.get(key, "") for key in keys_of_interest],
+                })
+                
+                # Add checkboxes to the DataFrame
+                for key in keys_of_interest:
+                    if key not in st.session_state.checkbox_states:
+                        st.session_state.checkbox_states[key] = False  # Initialize checkbox state
+                    checkbox_key = f"checkbox_{key}"
+                    st.session_state.checkbox_states[key] = st.checkbox(key, value=st.session_state.checkbox_states[key])  # Create checkbox
+                    editable_df.loc[editable_df['Keys'] == key, 'Match'] = st.session_state.checkbox_states[key]  # Update DataFrame
 
-                    if not contract_row.empty:
-                        keys_of_interest = [
-                            "Vendor/Merchant",
-                            "Original Contract Start Date",
-                            "Original Contract End Date",
-                            "New Contract Start Date",
-                            "New Contract End Date",
-                            "Contract Value"
-                        ]
-
-                        # Extract values for the specified keys from the JSON and Excel DataFrame
-                        values_from_excel = []
-                        extracted_values = []
-
-                        for key in keys_of_interest:
-                            if key in extracted_data:
-                                extracted_values.append(extracted_data[key])  # From extracted data
-                            else:
-                                extracted_values.append("")  # Placeholder if the key is not found
-
-                            if key in contract_row.columns:
-                                values_from_excel.append(contract_row.iloc[0][key])  # From Excel
-                            else:
-                                values_from_excel.append("")  # Placeholder if the key is not found
-
-                        # Create a new DataFrame for display
-                        editable_df = pd.DataFrame({
-                            'Keys': keys_of_interest,
-                            'Values from System': values_from_excel,
-                            'Extracted Information': extracted_values
-                        })
-
-                        # Generate comparison results using fuzzy logic
-                        comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
-
-                        # Initialize checkbox states if not already set
-                        if 'checkbox_states' not in st.session_state:
-                            st.session_state.checkbox_states = {key: (comparison_results[key] == "Yes") for key in keys_of_interest}
-
-                        # Add checkboxes directly to the DataFrame
-                        editable_df['Match'] = [
-                            st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states[key], key=f"checkbox_{key}") 
-                            for key in keys_of_interest
-                        ]
-
-                        # Update checkbox states based on user input
-                        for key in keys_of_interest:
-                            st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
-
-                        # Display the DataFrame with checkboxes
-                        st.dataframe(editable_df, use_container_width=True)
-
-                        # Display comparison results as JSON
-                        st.json(comparison_results)  # Display the comparison results
-
-                    else:
-                        st.warning(f"No data found for contract number: {contract_number}")
-                else:
-                    st.warning("Contract number not found in the Excel file.")
+                # Display the DataFrame
+                st.dataframe(editable_df)
 
             except json.JSONDecodeError as e:
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-                
+
+
 if __name__ == "__main__":
     if st.session_state.logged_in:
         col1, col2, col3 = st.columns([10, 10, 1.5])
