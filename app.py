@@ -116,6 +116,12 @@ def generate_content(image):
     # Return None if all retries fail
     return None
 
+def generate_compare(extracted_values, values_from_excel):
+    comparison_result = {}
+    for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
+        comparison_result[key] = "Yes" if extracted_value == excel_value else "No"
+    return comparison_result
+
 def main():
     st.title("Invoice Processing")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
@@ -128,32 +134,15 @@ def main():
 
         # Document tab
         with tabs[0]:  # Only within Document tab
-            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")  
-            st.markdown(
-                """
-                <style>
-                .st-emotion-cache-fis6aj.e1b2p2ww10 {
-                    background-color: #F0F0F0;
-                    color: black;                
-                }
-                body {
-                    background-color: white;
-                }
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
+            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
+            # ... (existing markdown styling)
 
             # Display uploaded images and data extraction button
             if uploaded_images:
                 for uploaded_image in uploaded_images:
-                    # Convert uploaded image to PIL image object
                     image = PIL.Image.open(uploaded_image)
-
-                    # Button label based on number of images
                     button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
 
-                    # Extract data button and result display
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
                             generated_text = generate_content(image)  # Generate content from image
@@ -171,39 +160,13 @@ def main():
 
     # Display extraction result in col3, separate from col1
     with col3:
-        # Display generated text if available
         if generated_text:
             try:
-                                # Display generated text for debugging
-                
-                # Extract the JSON part from the generated text
-                json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
-                json_str = json_str.replace("```json", "").replace("```", "").strip()  # Remove formatting
-                
-                try:
-                    # Parse the JSON response into a dictionary
-                    extracted_data = json.loads(json_str)  # Use json.loads to parse
-                
-                    # Display extracted data in bullet format
-                    st.markdown("### Extraction Result:")
-                    for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
-                        if key in extracted_data:
-                            st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
-                
-                except json.JSONDecodeError as e:
-                    st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
-                # Extract the JSON part from the generated text
-                json_str = generated_text.strip().split('\n', 1)[-1]  # Take the last part after the first newline
-                json_str = json_str.replace("```json", "").replace("```", "").strip()  # Remove formatting
-
-                # Parse the JSON response into a dictionary safely
+                # Extract and parse the JSON response
+                json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
 
-                # Print the extracted data for debugging
-                
-                # Extract contract number from the generated JSON
+                # Extract contract number
                 contract_number = extracted_data.get("Contract Number", "")
                 
                 # Find the row in the Excel DataFrame for the contract number
@@ -211,7 +174,6 @@ def main():
                     contract_row = df[df['Contract Number'] == contract_number]
 
                     if not contract_row.empty:
-                        # Prepare keys of interest
                         keys_of_interest = [
                             "Vendor/Merchant",
                             "Original Contract Start Date",
@@ -224,6 +186,7 @@ def main():
                         # Extract values for the specified keys from the JSON and Excel DataFrame
                         values_from_excel = []
                         extracted_values = []
+                        checkbox_states = []  # Store checkbox states
 
                         for key in keys_of_interest:
                             if key in extracted_data:
@@ -243,11 +206,18 @@ def main():
                             'Extracted Information': extracted_values
                         })
 
-                        # Create an editable table
-                        #updated_values = st.data_editor(editable_df, use_container_width=True, disabled=["Keys", "Values from Excel"])
+                        # Generate comparison results
+                        comparison_results = generate_compare(extracted_values, values_from_excel)
 
-                        # Display the updated values (if needed)
-                        #st.json(updated_values["Extracted Information"].tolist())  # Display the edited values as JSON
+                        # Add checkboxes to the DataFrame
+                        editable_df['Match'] = [st.checkbox(f"Match for {key}", value=(comparison_results[key] == "Yes")) for key in keys_of_interest]
+
+                        # Display the DataFrame with checkboxes
+                        st.dataframe(editable_df, use_container_width=True)
+
+                        # Display comparison results as JSON
+                        st.json(comparison_results)  # Display the comparison results
+
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
                 else:
