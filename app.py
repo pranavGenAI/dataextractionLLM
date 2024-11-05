@@ -133,6 +133,7 @@ def main():
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
 
     generated_text = ""
+    checkbox_states = {}
 
     with col1:
         # Place tabs within col1
@@ -192,7 +193,6 @@ def main():
                         # Extract values for the specified keys from the JSON and Excel DataFrame
                         values_from_excel = []
                         extracted_values = []
-                        checkbox_states = []  # Store checkbox states
 
                         for key in keys_of_interest:
                             if key in extracted_data:
@@ -215,8 +215,19 @@ def main():
                         # Generate comparison results using fuzzy logic
                         comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
 
-                        # Add checkboxes to the DataFrame
-                        editable_df['Match'] = [st.checkbox(f"Match for {key}", value=(comparison_results[key] == "Yes")) for key in keys_of_interest]
+                        # Initialize checkbox states if not already set
+                        if 'checkbox_states' not in st.session_state:
+                            st.session_state.checkbox_states = {key: (comparison_results[key] == "Yes") for key in keys_of_interest}
+
+                        # Add checkboxes directly to the DataFrame
+                        editable_df['Match'] = [
+                            st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states[key], key=f"checkbox_{key}") 
+                            for key in keys_of_interest
+                        ]
+
+                        # Update checkbox states based on user input
+                        for key in keys_of_interest:
+                            st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
                         # Display the DataFrame with checkboxes
                         st.dataframe(editable_df, use_container_width=True)
