@@ -118,8 +118,11 @@ def generate_content(image):
     # Return None if all retries fail
     return None
 def parse_json_response(response):
+    # Ensure response is a string before processing
+    response_str = str(response)  # Convert response to a string, if not already
+    
     # Use regex to find JSON block within the response
-    json_match = re.search(r'{.*}', response)  # Adjust pattern as needed
+    json_match = re.search(r'{.*}', response_str)  # Adjust pattern as needed
     if json_match:
         json_str = json_match.group(0)
         try:
@@ -131,7 +134,7 @@ def parse_json_response(response):
     else:
         st.error("No valid JSON found in the model's response.")
         st.write("Raw response:")
-        st.text(response)  # Display full response for debugging
+        st.text(response_str)  # Display full response for debugging
     return None
 
 def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
