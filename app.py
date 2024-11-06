@@ -137,12 +137,17 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
             ...
         }} Make sure to return only the JSON, with no other text or explanation.""")
 
+    # Clean the response
+    cleaned_response = response.text.strip().replace("```json", "").replace("```", "").strip()
+
     try:
-        comparison_results = json.loads(response.text)
+        # Parse the cleaned response as JSON
+        comparison_results = json.loads(cleaned_response)
         return comparison_results
     except json.JSONDecodeError:
-        st.error(f"Invalid JSON returned by AI: {response.text}")
+        st.error(f"Invalid JSON returned by AI: {cleaned_response}")
         return {}
+
     
 def main():
     st.title("Invoice Processing")
