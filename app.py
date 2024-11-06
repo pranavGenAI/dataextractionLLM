@@ -137,21 +137,30 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
             ...
         }} Make sure to return only the JSON, with no other text or explanation.""")
 
-    # Extract the content from the response
+    # Ensure response contains candidates and extract the JSON content
     if hasattr(response, 'candidates') and len(response.candidates) > 0:
-        # Get the JSON output from the first candidate
-        content = response.candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+        candidate = response.candidates[0]  # Access the first candidate
+        
+        # Debug: Print the entire candidate object to inspect its structure
+        st.write(candidate)  # This will show the structure of the candidate object
+        
+        # Extract the text from the content
+        if 'content' in candidate and 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
+            content = candidate['content']['parts'][0].get('text', '').strip()
 
-        # If the response has content, return it
-        if content:
-            st.write("Response:", content)  # Display the output as a JSON string
-            return content  # Return the comparison text content
+            if content:
+                st.write("Response:", content)  # Display the output as a JSON string
+                return content  # Return the comparison text content
+            else:
+                st.error("The generated content does not contain valid text.")
+                return None
         else:
-            st.error("The generated content does not contain text.")
+            st.error("The response content does not have the expected structure.")
             return None
     else:
         st.error("Failed to generate content or no candidates found in the response.")
         return None
+
     
 def main():
     st.title("Invoice Processing")
