@@ -148,9 +148,12 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         if 'content' in candidate and 'parts' in candidate['content'] and len(candidate['content']['parts']) > 0:
             content = candidate['content']['parts'][0].get('text', '').strip()
 
-            if content:
-                st.write("Response:", content)  # Display the output as a JSON string
-                return content  # Return the comparison text content
+            # Remove the JSON code block markers (```json and ```)
+            clean_content = content.replace('```json', '').replace('```', '').strip()
+
+            if clean_content:
+                st.write("Response:", clean_content)  # Display the output as a clean JSON string
+                return clean_content  # Return the cleaned comparison text content
             else:
                 st.error("The generated content does not contain valid text.")
                 return None
