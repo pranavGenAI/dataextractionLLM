@@ -134,6 +134,7 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
 
 def main():
     st.title("Invoice Processing")
+    st.markdown("")
     col1, col2, col3 = st.columns([4, 1, 4])  # Create three columns
 
     generated_text = ""
@@ -155,7 +156,7 @@ def main():
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
                             generated_text = generate_content(image)  # Generate content from image
-                            st.write(f"Generated text: {generated_text}")
+                            #st.write(f"Generated text: {generated_text}")
 
                     st.image(uploaded_image, caption="", use_column_width=True)
 
@@ -174,7 +175,7 @@ def main():
             try:
                 # Extract and parse the JSON response
                 json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
-                st.write(f"Extracted JSON string: {json_str}")
+                #st.write(f"Extracted JSON string: {json_str}")
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
 
                 # Display extracted data in bullet format
@@ -185,12 +186,12 @@ def main():
 
                 # Extract contract number
                 contract_number = extracted_data.get("Contract Number", "")
-                st.write(f"Contract Number extracted: {contract_number}")
+                #st.write(f"Contract Number extracted: {contract_number}")
 
                 # Find the row in the Excel DataFrame for the contract number
                 if not df.empty and contract_number:
                     contract_row = df[df['Contract Number'] == contract_number]
-                    st.write(f"Found contract row: {contract_row}")
+                    #st.write(f"Found contract row: {contract_row}")
 
                     if not contract_row.empty:
                         keys_of_interest = [
@@ -217,12 +218,12 @@ def main():
                             else:
                                 values_from_excel.append("")  # Placeholder if the key is not found
 
-                        st.write(f"Extracted values: {extracted_values}")
-                        st.write(f"Values from Excel: {values_from_excel}")
+                        #st.write(f"Extracted values: {extracted_values}")
+                        #st.write(f"Values from Excel: {values_from_excel}")
 
                         # Use the AI model to generate comparison results
                         comparison_results = generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest)
-                        st.write(f"Comparison results: {comparison_results}")
+                        #st.write(f"Comparison results: {comparison_results}")
 
                         # Initialize checkbox states in session_state if not already done
                         if 'checkbox_states' not in st.session_state:
@@ -248,7 +249,7 @@ def main():
                         st.dataframe(editable_df, use_container_width=True)
 
                         # Display comparison results as JSON
-                        st.json(comparison_results)
+                        #st.json(comparison_results)
 
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
