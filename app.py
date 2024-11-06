@@ -45,9 +45,6 @@ def hash_password(password):
 
 # Define users and hashed passwords for simplicity
 users = {
-    "ankur.d.shrivastav": hash_password("ankur123"),
-    "sashank.vaibhav.allu": hash_password("sashank123"),
-    "shivananda.mallya": hash_password("shiv123"),
     "pranav.baviskar": hash_password("pranav123")
 }
 
@@ -120,14 +117,12 @@ def generate_content(image):
 
 def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
     model = genai.GenerativeModel('gemini-1.5-pro')
-
     # Format the prompt for the AI model to compare each key
     prompt = {
         "keys_of_interest": keys_of_interest,
         "extracted_values": extracted_values,
         "values_from_excel": values_from_excel
     }
-
     # Generate the comparison JSON response
     response = model.generate_content(f"""Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key. Response should only include json file in the format like:
         Example format:
@@ -136,10 +131,8 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
             "Key2": "No",
             ...
         }} Make sure to return only the JSON, with no other text or explanation.""")
-
     # Clean the response
     cleaned_response = response.text.strip().replace("```json", "").replace("```", "").strip()
-
     try:
         # Parse the cleaned response as JSON
         comparison_results = json.loads(cleaned_response)
@@ -163,6 +156,16 @@ def main():
         with tabs[0]:
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
 
+                        # Inject custom CSS to hide the element
+            hide_css = """
+                <style>
+                    .st-emotion-cache-fis6aj, .e1b2p2ww10 {
+                        display: none !important;
+                    }
+                </style>
+            """
+            st.markdown(hide_css, unsafe_allow_html=True)
+            
             # Display uploaded images and data extraction button
             if uploaded_images:
                 for uploaded_image in uploaded_images:
