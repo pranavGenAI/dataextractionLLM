@@ -135,11 +135,11 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
             "Key1": "Yes",
             "Key2": "No",
             ...
-        }}""")
+        }} Make sure to return only the JSON, with no other text or explanation.""")
     st.write("Response",response.text)
     # Extract the content from the response
     content = response.result['candidates'][0]['content']['parts'][0]['text']
-    st.write("content",content)
+    st.write("Response:", content)  # Display the output as a JSON string
     return content  # Return the comparison text content
     
 def main():
