@@ -117,9 +117,9 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest, max_retries=5):
+def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
     model = genai.GenerativeModel('gemini-1.5-pro')
-    
+
     # Format the prompt for the AI model to compare each key
     prompt = {
         "keys_of_interest": keys_of_interest,
@@ -127,33 +127,10 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         "values_from_excel": values_from_excel
     }
 
-    # Attempt generating content with retries
-    retries = 0
-    while retries < max_retries:
-        try:
-            st.write(f"Prompt being sent to model: {prompt}")
-            response = model.generate_content(
-                f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key."
-            )
-            st.write(f"Raw model response: {response}")  # Debug raw response
-            
-            # Check if the response is in the correct format
-            response_text = response.text if hasattr(response, 'text') else str(response)
-            return json.loads(response_text)
-        except json.JSONDecodeError as e:
-            st.error(f"JSON decoding error: {e}")
-            return {}
-        except genai.exceptions.RateLimitError:
-            retries += 1
-            wait_time = 2 ** retries  # Exponential backoff
-            st.warning(f"Rate limit reached, retrying in {wait_time} seconds...")
-            time.sleep(wait_time)
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
-            break
-
-    # If retries exhausted, raise an error or return a meaningful message
-    raise Exception("Max retries exceeded due to rate limiting.")
+    # Use model to generate the comparison JSON response
+    response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
+    st.write(response)
+    return json.loads(response)
 
 def main():
     st.title("Invoice Processing")
@@ -178,7 +155,6 @@ def main():
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
                             generated_text = generate_content(image)  # Generate content from image
-                            st.write(f"Generated text: {generated_text}")
 
                     st.image(uploaded_image, caption="", use_column_width=True)
 
@@ -196,8 +172,7 @@ def main():
         if generated_text:
             try:
                 # Extract and parse the JSON response
-                json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
-                st.write(f"Extracted JSON string: {json_str}")
+                json_str = generated_text.strip().split('\n', 1)[-1].replace("\json", "").replace("\n", "").strip()
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
 
                 # Display extracted data in bullet format
@@ -205,15 +180,13 @@ def main():
                 for key in ["Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
                     if key in extracted_data:
                         st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
-
+  
                 # Extract contract number
                 contract_number = extracted_data.get("Contract Number", "")
-                st.write(f"Contract Number extracted: {contract_number}")
-
+                
                 # Find the row in the Excel DataFrame for the contract number
                 if not df.empty and contract_number:
                     contract_row = df[df['Contract Number'] == contract_number]
-                    st.write(f"Found contract row: {contract_row}")
 
                     if not contract_row.empty:
                         keys_of_interest = [
@@ -240,12 +213,8 @@ def main():
                             else:
                                 values_from_excel.append("")  # Placeholder if the key is not found
 
-                        st.write(f"Extracted values: {extracted_values}")
-                        st.write(f"Values from Excel: {values_from_excel}")
-
                         # Use the AI model to generate comparison results
                         comparison_results = generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest)
-                        st.write(f"Comparison results: {comparison_results}")
 
                         # Initialize checkbox states in session_state if not already done
                         if 'checkbox_states' not in st.session_state:
@@ -271,7 +240,7 @@ def main():
                         st.dataframe(editable_df, use_container_width=True)
 
                         # Display comparison results as JSON
-                        st.json(comparison_results)
+                        st.json(comparison_results)  # Display the comparison results
 
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
@@ -282,6 +251,7 @@ def main():
                 st.error(f"Failed to parse generated text as JSON: {e}. Please check the output.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+                
                 
 if __name__ == "__main__":
     if st.session_state.logged_in:
