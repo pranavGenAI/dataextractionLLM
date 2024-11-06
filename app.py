@@ -129,8 +129,31 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
 
     # Use model to generate the comparison JSON response
     response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
-    st.write(response)
-    return json.loads(response)
+    
+    # Print the raw response to examine its content
+    st.write("Raw response from model:", response)
+
+    # Attempt to extract JSON-like content only
+    json_text = response.strip()
+    
+    # Use regex to isolate JSON if there’s extra text
+    import re
+    match = re.search(r"\{.*\}", json_text)
+    
+    if match:
+        json_text = match.group(0)
+    else:
+        st.error("No JSON structure found in the response.")
+        return None
+
+    # Parse JSON
+    try:
+        parsed_json = json.loads(json_text)
+    except json.JSONDecodeError as e:
+        st.error(f"Failed to parse JSON: {e}. Please check the raw output.")
+        return None
+    
+    return parsed_json
 
 def main():
     st.title("Invoice Processing")
