@@ -188,7 +188,12 @@ def main():
                 # Extract and parse the JSON response
                 json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
-
+                    # Display extracted data in bullet format
+                st.markdown("### Extraction Result:")
+                for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
+                    if key in extracted_data:
+                        st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
+  
                 # Extract contract number
                 contract_number = extracted_data.get("Contract Number", "")
                 
