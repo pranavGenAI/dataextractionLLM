@@ -117,9 +117,26 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest, max_retries=5):
+def parse_json_response(response):
+    # Use regex to find JSON block within the response
+    json_match = re.search(r'{.*}', response)  # Adjust pattern as needed
+    if json_match:
+        json_str = json_match.group(0)
+        try:
+            return json.loads(json_str)  # Attempt to parse JSON
+        except json.JSONDecodeError as e:
+            st.error(f"JSON parsing failed: {e}")
+            st.write("Raw JSON string:")
+            st.code(json_str, language="json")  # Display JSON for debugging
+    else:
+        st.error("No valid JSON found in the model's response.")
+        st.write("Raw response:")
+        st.text(response)  # Display full response for debugging
+    return None
+
+def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
     model = genai.GenerativeModel('gemini-1.5-pro')
-    
+
     # Format the prompt for the AI model to compare each key
     prompt = {
         "keys_of_interest": keys_of_interest,
@@ -127,33 +144,15 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         "values_from_excel": values_from_excel
     }
 
-    # Attempt generating content with retries
-    retries = 0
-    while retries < max_retries:
-        try:
-            st.write(f"Prompt being sent to model: {prompt}")
-            response = model.generate_content(
-                f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key."
-            )
-            st.write(f"Raw model response: {response}")  # Debug raw response
-            
-            # Check if the response is in the correct format
-            response_text = response.text if hasattr(response, 'text') else str(response)
-            return json.loads(response_text)
-        except json.JSONDecodeError as e:
-            st.error(f"JSON decoding error: {e}")
-            return {}
-        except genai.exceptions.RateLimitError:
-            retries += 1
-            wait_time = 2 ** retries  # Exponential backoff
-            st.warning(f"Rate limit reached, retrying in {wait_time} seconds...")
-            time.sleep(wait_time)
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
-            break
-
-    # If retries exhausted, raise an error or return a meaningful message
-    raise Exception("Max retries exceeded due to rate limiting.")
+    # Generate the comparison JSON response
+    response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
+    parsed_response = parse_json_response(response)
+    
+    if parsed_response:
+        return parsed_response
+    else:
+        st.error("Comparison failed due to parsing issues. See debugging information above.")
+        return {}
 
 def main():
     st.title("Invoice Processing")
