@@ -117,25 +117,6 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-def parse_json_response(response):
-    # Ensure response is a string before processing
-    response_str = str(response)  # Convert response to a string, if not already
-    
-    # Use regex to find JSON block within the response
-    json_match = re.search(r'{.*}', response_str)  # Adjust pattern as needed
-    if json_match:
-        json_str = json_match.group(0)
-        try:
-            return json.loads(json_str)  # Attempt to parse JSON
-        except json.JSONDecodeError as e:
-            st.error(f"JSON parsing failed: {e}")
-            st.write("Raw JSON string:")
-            st.code(json_str, language="json")  # Display JSON for debugging
-    else:
-        st.error("No valid JSON found in the model's response.")
-        st.write("Raw response:")
-        st.text(response_str)  # Display full response for debugging
-    return None
 
 def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
     model = genai.GenerativeModel('gemini-1.5-pro')
@@ -146,16 +127,10 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         "extracted_values": extracted_values,
         "values_from_excel": values_from_excel
     }
-
+    st.write(prompt)
     # Generate the comparison JSON response
     response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
-    parsed_response = parse_json_response(response)
-    
-    if parsed_response:
-        return parsed_response
-    else:
-        st.error("Comparison failed due to parsing issues. See debugging information above.")
-        return {}
+    return response
 
 def main():
     st.title("Invoice Processing")
