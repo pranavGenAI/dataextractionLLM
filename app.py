@@ -115,7 +115,7 @@ def generate_content(image):
     # Return None if all retries fail
     return None
 
-def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
+def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest, max_retries=5):
     model = genai.GenerativeModel('gemini-1.5-pro')
 
     # Format the prompt for the AI model to compare each key
@@ -125,14 +125,25 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         "values_from_excel": values_from_excel
     }
 
-    # Use model to generate the comparison JSON response
-    response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
+    # Prepare request and retry if rate limited
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = model.generate_content(
+                f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key."
+            )
+            response_text = response.text if hasattr(response, 'text') else str(response)
+            return json.loads(response_text)
+        except genai.exceptions.RateLimitError:
+            retries += 1
+            wait_time = 2 ** retries  # Exponential backoff
+            time.sleep(wait_time)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            break
 
-    # Assuming `response` is an object, extract the text content
-    response_text = response.text if hasattr(response, 'text') else str(response)
-
-    # Parse the JSON from the response text
-    return json.loads(response_text)
+    # If retries exhausted, raise an error or return a meaningful message
+    raise Exception("Max retries exceeded due to rate limiting.")
 
 def main():
     st.title("Invoice Processing")
