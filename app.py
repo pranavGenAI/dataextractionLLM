@@ -123,6 +123,7 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
         "extracted_values": extracted_values,
         "values_from_excel": values_from_excel
     }
+    st.write(prompt)
     # Generate the comparison JSON response
     response = model.generate_content(f"""Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key. It won't be an exact match. So understand the value of both and if the match is making sense then only return Yes. Response should only include json file in the format like:
         Example format:
