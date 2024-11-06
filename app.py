@@ -136,6 +136,7 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
     try:
         # Parse the cleaned response as JSON
         comparison_results = json.loads(cleaned_response)
+        st.write(comparison_results)
         return comparison_results
     except json.JSONDecodeError:
         st.error(f"Invalid JSON returned by AI: {cleaned_response}")
