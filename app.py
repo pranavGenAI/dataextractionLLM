@@ -130,17 +130,28 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
 
     # Generate the comparison JSON response
     response = model.generate_content(f"""Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key. Response should only include json file in the format like:
-            Example format:
+        Example format:
         {{
             "Key1": "Yes",
             "Key2": "No",
             ...
         }} Make sure to return only the JSON, with no other text or explanation.""")
-    st.write("Response",response.text)
+
     # Extract the content from the response
-    content = response.result['candidates'][0]['content']['parts'][0]['text']
-    st.write("Response:", content)  # Display the output as a JSON string
-    return content  # Return the comparison text content
+    if hasattr(response, 'candidates') and len(response.candidates) > 0:
+        # Get the JSON output from the first candidate
+        content = response.candidates[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+
+        # If the response has content, return it
+        if content:
+            st.write("Response:", content)  # Display the output as a JSON string
+            return content  # Return the comparison text content
+        else:
+            st.error("The generated content does not contain text.")
+            return None
+    else:
+        st.error("Failed to generate content or no candidates found in the response.")
+        return None
     
 def main():
     st.title("Invoice Processing")
