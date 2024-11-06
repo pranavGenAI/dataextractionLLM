@@ -130,9 +130,11 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
 
     # Generate the comparison JSON response
     response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
-    st.write(response)
-    # Access the content of the response (check the specific attribute for your response object)
-    return response  # Assuming 'content' holds the desired output, update this based on the actual structure
+    
+    # Extract the content from the response
+    content = response.result['candidates'][0]['content']['parts'][0]['text']
+    
+    return content  # Return the comparison text content
     
 def main():
     st.title("Invoice Processing")
