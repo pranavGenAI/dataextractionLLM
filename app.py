@@ -45,9 +45,6 @@ def hash_password(password):
 
 # Define users and hashed passwords for simplicity
 users = {
-    "ankur.d.shrivastav": hash_password("ankur123"),
-    "sashank.vaibhav.allu": hash_password("sashank123"),
-    "shivananda.mallya": hash_password("shiv123"),
     "pranav.baviskar": hash_password("pranav123")
 }
 
@@ -119,7 +116,7 @@ def generate_content(image):
     return None
 
 def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
-    model = GenerativeModel('gemini-1.5-pro')
+    model = genai.GenerativeModel('gemini-1.5-pro')
 
     # Format the prompt for the AI model to compare each key
     prompt = {
