@@ -154,7 +154,7 @@ def main():
 
         # Document tab
         with tabs[0]:
-            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
+            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=False, label_visibility="collapsed")
 
                         # Inject custom CSS to hide the element
             hide_css = """
