@@ -136,34 +136,13 @@ def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest
             "Key2": "No",
             ...
         }} Make sure to return only the JSON, with no other text or explanation.""")
-    st.write("LLM Response",response.text)
-    # Ensure response contains candidates and extract the JSON content
-    if hasattr(response, 'candidates') and len(response.candidates) > 0:
-        candidate = response.candidates[0]  # Access the first candidate
-        
-        # Debug: Print the entire candidate object to inspect its structure
-        st.write("Candidate structure:", candidate)  # This will show the structure of the candidate object
-        
-        # Assuming candidate is an object, access the 'content' attribute and parts
-        if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts') and len(candidate.content.parts) > 0:
-            content = candidate.content.parts[0].get('text', '').strip()
 
-            # Remove the JSON code block markers (```json and ```)
-            clean_content = content.replace('```json', '').replace('```', '').strip()
-
-            if clean_content:
-                st.write("Response:", clean_content)  # Display the output as a clean JSON string
-                return clean_content  # Return the cleaned comparison text content
-            else:
-                st.error("The generated content does not contain valid text.")
-                return None
-        else:
-            st.error("The response content does not have the expected structure.")
-            return None
-    else:
-        st.error("Failed to generate content or no candidates found in the response.")
-        return None
-
+    try:
+        comparison_results = json.loads(response.text)
+        return comparison_results
+    except json.JSONDecodeError:
+        st.error(f"Invalid JSON returned by AI: {response.text}")
+        return {}
     
 def main():
     st.title("Invoice Processing")
