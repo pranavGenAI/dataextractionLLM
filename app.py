@@ -117,34 +117,20 @@ def generate_content(image):
     
     # Return None if all retries fail
     return None
-def normalize_string(s):
-    """Normalize the input string by stripping whitespace, converting to lowercase,
-    removing special characters, and reducing multiple spaces to a single space."""
-    if s is None:
-        return ""
-    return re.sub(r'\s+', ' ', re.sub(r'[^\w\s]', '', s.strip().lower()))
 
-def generate_compare(extracted_values, values_from_excel, keys_of_interest):
-    comparison_result = {}
-    for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        # Convert values to strings before normalization and stripping
-        extracted_value_str = normalize_string(str(extracted_value) if extracted_value is not None else "")
-        excel_value_str = normalize_string(str(excel_value) if excel_value is not None else "")
-        
-        # Use fuzzy matching to compare normalized extracted values with normalized Excel values
-        similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 60 else "No"  # Adjust threshold as necessary
-    return comparison_result
-    
-def generate_compare(extracted_values, values_from_excel, keys_of_interest):
-    comparison_result = {}
-    for key, extracted_value, excel_value in zip(keys_of_interest, extracted_values, values_from_excel):
-        extracted_value_str = normalize_string(str(extracted_value) if extracted_value is not None else "")
-        excel_value_str = normalize_string(str(excel_value) if excel_value is not None else "")
-        
-        similarity_score = fuzz.token_sort_ratio(extracted_value_str, excel_value_str)
-        comparison_result[key] = "Yes" if similarity_score >= 70 else "No"  # Adjust threshold as necessary
-    return comparison_result
+def generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest):
+    model = GenerativeModel('gemini-1.5-pro')
+
+    # Format the prompt for the AI model to compare each key
+    prompt = {
+        "keys_of_interest": keys_of_interest,
+        "extracted_values": extracted_values,
+        "values_from_excel": values_from_excel
+    }
+
+    # Use model to generate the comparison JSON response
+    response = model.generate_content(f"Compare the extracted values with values from Excel for each key in {prompt} and return a JSON with 'Yes' or 'No' as values for each key.")
+    return json.loads(response)
 
 def main():
     st.title("Invoice Processing")
@@ -188,9 +174,10 @@ def main():
                 # Extract and parse the JSON response
                 json_str = generated_text.strip().split('\n', 1)[-1].replace("```json", "").replace("```", "").strip()
                 extracted_data = json.loads(json_str)  # Use json.loads to parse
-                    # Display extracted data in bullet format
+
+                # Display extracted data in bullet format
                 st.markdown("### Extraction Result:")
-                for key in ["Vendor/Merchant", "Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
+                for key in ["Within COVID", "Addressed to NYDOH", "Contractor Signature Present", "Officer Signature Present"]:
                     if key in extracted_data:
                         st.markdown(f"- **{key}**: {extracted_data[key]}")  # Format each key-value pair as a bullet point
   
@@ -226,8 +213,8 @@ def main():
                             else:
                                 values_from_excel.append("")  # Placeholder if the key is not found
 
-                        # Generate comparison results using fuzzy logic
-                        comparison_results = generate_compare(extracted_values, values_from_excel, keys_of_interest)
+                        # Use the AI model to generate comparison results
+                        comparison_results = generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest)
 
                         # Initialize checkbox states in session_state if not already done
                         if 'checkbox_states' not in st.session_state:
