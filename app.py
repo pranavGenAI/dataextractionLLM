@@ -249,9 +249,9 @@ def main():
                             for key in keys_of_interest
                         ]
 
-                        # Update session state based on user input
-                        for key in keys_of_interest:
-                            st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
+                        # # Update session state based on user input
+                        # for key in keys_of_interest:
+                        #     st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
                         # Display the DataFrame with checkboxes
                         st.dataframe(editable_df, use_container_width=True)
