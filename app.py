@@ -154,15 +154,15 @@ def main():
 
         # Document tab
         with tabs[0]:
-            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=False, label_visibility="collapsed")
+            uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
 
                         # Inject custom CSS to hide the element
             hide_css = """
-                <style>
-                    .st-emotion-cache-fis6aj, .e1b2p2ww10 {
-                        display: none !important;
-                    }
-                </style>
+                    <style>
+                        .st-emotion-cache-fis6aj, .e1b2p2ww10 {
+                            color: white !important;
+                        }
+                    </style>
             """
             st.markdown(hide_css, unsafe_allow_html=True)
             
