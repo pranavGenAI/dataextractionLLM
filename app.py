@@ -157,12 +157,13 @@ def main():
             uploaded_images = st.file_uploader("Upload images", type=["jpg", "jpeg", "png"], accept_multiple_files=True, label_visibility="collapsed")
 
                         # Inject custom CSS to hide the element
-            hide_css = """
-                    <style>
-                        .st-emotion-cache-fis6aj, .e1b2p2ww10 {
-                            color: white !important;
-                        }
-                    </style>
+             hide_css = """
+            <style>
+                .st-emotion-cache-fis6aj, .e1b2p2ww10 {
+                    color: white !important;
+                    background-color: white !important;
+                }
+            </style>
             """
             st.markdown(hide_css, unsafe_allow_html=True)
             
