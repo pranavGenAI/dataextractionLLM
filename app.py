@@ -242,15 +242,17 @@ def main():
                         col1.write("Parameter")
                         col2.write("Extracted Value")
                         col3.write("System Data")
-                        col4.write("Comparison")
+                        col4.write(" ")
                         # Display each key, value, and checkbox in a row
+                        k = 0
                         for key, value in comparison_results.items():
                             checkbox_default = value == "Yes"
                             col1, col2, col3, col4 = st.columns([0.3, 0.3, 0.3, 0.1])
-                            col1.write(keys_of_interest[0])
-                            col2.write(extracted_values[0])
-                            col3.write(values_from_excel[0])
+                            col1.write(keys_of_interest[k])
+                            col2.write(extracted_values[k])
+                            col3.write(values_from_excel[k])
                             checkbox = col4.checkbox("", value=checkbox_default, key=key)
+                            k = k + 1
                         # Initialize checkbox states in session_state if not already done
                         # if 'checkbox_states' not in st.session_state:
                             # st.session_state.checkbox_states = {key: (comparison_results.get(key, "No") == "Yes") for key in keys_of_interest}
