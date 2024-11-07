@@ -247,9 +247,9 @@ def main():
                         for key, value in comparison_results.items():
                             checkbox_default = value == "Yes"
                             col1, col2, col3, col4 = st.columns([0.3, 0.3, 0.3, 0.1])
-                            col1.write(keys_of_interest)
-                            col2.write(extracted_values)
-                            col3.write(values_from_excel)
+                            col1.write(keys_of_interest[0])
+                            col2.write(extracted_values[0])
+                            col3.write(values_from_excel[0])
                             checkbox = col4.checkbox("", value=checkbox_default, key=key)
                         # Initialize checkbox states in session_state if not already done
                         # if 'checkbox_states' not in st.session_state:
