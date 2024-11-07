@@ -244,7 +244,7 @@ def main():
                         col3.write("System Data")
                         col4.write("Comparison")
                         # Display each key, value, and checkbox in a row
-                        for key, value in generate_compare_genAI.items():
+                        for key, value in comparison_results.items():
                             checkbox_default = value == "Yes"
                             col1, col2, col3, col4 = st.columns([0.3, 0.3, 0.3, 0.1])
                             col1.write(keys_of_interest)
