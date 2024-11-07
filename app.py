@@ -236,63 +236,44 @@ def main():
 
                         # Use the AI model to generate comparison results
                         comparison_results = generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest)
-                        # Custom CSS for table styling
-                        table_style = """
-                        <style>
-                            table {
-                                width: 100%;
-                                border-collapse: collapse;
-                            }
-                            th, td {
-                                border: 1px solid #ddd;
-                                padding: 8px;
-                                text-align: left;
-                            }
-                            th {
-                                background-color: #f2f2f2;
-                                font-weight: bold;
-                            }
-                            tr:nth-child(even) {background-color: #f9f9f9;}
-                            tr:hover {background-color: #f1f1f1;}
-                        </style>
-                        """
+                        col1, col2, col3,col4 = st.columns([0.3, 0.3, 0.3, 0.1])
+                        col1.write("Parameter")
+                        col2.write("Extracted Value")
+                        col3.write("System Data")
+                        col4.write(" ")
+                        # Display each key, value, and checkbox in a row
+                        k = 0
+                        for key, value in comparison_results.items():
+                            checkbox_default = value == "Yes"
+                            col1, col2, col3, col4 = st.columns([0.3, 0.3, 0.3, 0.1])
+                            col1.write(keys_of_interest[k])
+                            col2.write(extracted_values[k])
+                            col3.write(values_from_excel[k])
+                            checkbox = col4.checkbox("", value=checkbox_default, key=key)
+                            k = k + 1
+                        # Initialize checkbox states in session_state if not already done
+                        # if 'checkbox_states' not in st.session_state:
+                            # st.session_state.checkbox_states = {key: (comparison_results.get(key, "No") == "Yes") for key in keys_of_interest}
 
-                        # Start HTML table
-                        table_html = """
-                        <table>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Extracted Value</th>
-                                <th>System Data</th>
-                                <th>Comparison</th>
-                            </tr>
-                        """
+                        # # Add checkboxes directly to the DataFrame
+                        # editable_df = pd.DataFrame({
+                        #     'Keys': keys_of_interest,
+                        #     'Values from System': values_from_excel,
+                        #     'Extracted Information': extracted_values
+                        # })
 
-                        # Populate the rows
-                        for i, key in enumerate(keys_of_interest):
-                            extracted_value = extracted_values[i]
-                            system_value = values_from_excel[i]
-                            comparison_result = comparison_results.get(key, "No")
-                            checkbox_checked = comparison_result == "Yes"
+                        # editable_df['Match'] = [
+                        #     st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states.get(key, False), key=f"checkbox_{key}") 
+                        #     for key in keys_of_interest
+                        # ]
 
-                            # Create a checkbox for each row and get the user's input
-                            checkbox = st.checkbox("", value=checkbox_checked, key=f"checkbox_{key}")
+                        # # Update session state based on user input
+                        # for key in keys_of_interest:
+                        #     st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
-                            # Add row to HTML table
-                            table_html += f"""
-                            <tr>
-                                <td>{key}</td>
-                                <td>{extracted_value}</td>
-                                <td>{system_value}</td>
-                                <td>{'Yes' if checkbox else 'No'}</td>
-                            </tr>
-                            """
+                        # # Display the DataFrame with checkboxes
+                        # st.dataframe(editable_df, use_container_width=True)
 
-                        # Close the table
-                        table_html += "</table>"
-
-                        # Display the styled table
-                        st.markdown(table_style + table_html, unsafe_allow_html=True)
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
                 else:
