@@ -238,29 +238,41 @@ def main():
 
                         # Use the AI model to generate comparison results
                         comparison_results = generate_compare_genAI(extracted_values, values_from_excel, keys_of_interest)
-
+                        col1, col2, col3,col4 = st.columns([0.3, 0.3, 0.3, 0.1])
+                        col1.write("Parameter")
+                        col2.write("Extracted Value")
+                        col3.write("System Data")
+                        col4.write("Comparison")
+                        # Display each key, value, and checkbox in a row
+                        for key, value in generate_compare_genAI.items():
+                            checkbox_default = value == "Yes"
+                            col1, col2, col3, col4 = st.columns([0.3, 0.3, 0.3, 0.1])
+                            col1.write(keys_of_interest)
+                            col2.write(extracted_values)
+                            col3.write(values_from_excel)
+                            checkbox = col4.checkbox("", value=checkbox_default, key=key)
                         # Initialize checkbox states in session_state if not already done
-                        if 'checkbox_states' not in st.session_state:
-                            st.session_state.checkbox_states = {key: (comparison_results.get(key, "No") == "Yes") for key in keys_of_interest}
+                        # if 'checkbox_states' not in st.session_state:
+                            # st.session_state.checkbox_states = {key: (comparison_results.get(key, "No") == "Yes") for key in keys_of_interest}
 
-                        # Add checkboxes directly to the DataFrame
-                        editable_df = pd.DataFrame({
-                            'Keys': keys_of_interest,
-                            'Values from System': values_from_excel,
-                            'Extracted Information': extracted_values
-                        })
+                        # # Add checkboxes directly to the DataFrame
+                        # editable_df = pd.DataFrame({
+                        #     'Keys': keys_of_interest,
+                        #     'Values from System': values_from_excel,
+                        #     'Extracted Information': extracted_values
+                        # })
 
-                        editable_df['Match'] = [
-                            st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states.get(key, False), key=f"checkbox_{key}") 
-                            for key in keys_of_interest
-                        ]
+                        # editable_df['Match'] = [
+                        #     st.checkbox(f"Match for {key}", value=st.session_state.checkbox_states.get(key, False), key=f"checkbox_{key}") 
+                        #     for key in keys_of_interest
+                        # ]
 
                         # # Update session state based on user input
                         # for key in keys_of_interest:
                         #     st.session_state.checkbox_states[key] = editable_df['Match'][keys_of_interest.index(key)]
 
-                        # Display the DataFrame with checkboxes
-                        st.dataframe(editable_df, use_container_width=True)
+                        # # Display the DataFrame with checkboxes
+                        # st.dataframe(editable_df, use_container_width=True)
 
                     else:
                         st.warning(f"No data found for contract number: {contract_number}")
