@@ -171,7 +171,7 @@ def main():
             if uploaded_images:
                 for uploaded_image in uploaded_images:
                     image = PIL.Image.open(uploaded_image)
-                    button_label = f"Extract data {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
+                    button_label = f"Validate {uploaded_images.index(uploaded_image) + 1}" if len(uploaded_images) > 1 else "Extract data"
 
                     if st.button(button_label):
                         with st.spinner("Evaluating..."):
