@@ -42,7 +42,7 @@ if "validated_queue" not in st.session_state:
 
 # Configure Google Generative AI with the API key
 # GOOGLE_API_KEY = st.secrets['GEMINI_API_KEY']
-GOOGLE_API_KEY = "AIzaSyCiPGxwD04JwxifewrYiqzufyd25VjKBkw"
+GOOGLE_API_KEY = "AIzaSyBJJfXHfC80NWtiKGA57aO2mGsT-aD9fhQ"
 genai.configure(api_key=GOOGLE_API_KEY)
 
 def hash_password(password):
