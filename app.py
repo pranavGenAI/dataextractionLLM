@@ -7,7 +7,7 @@ import json
 from uuid import uuid4  # To generate unique IDs for each case
 
 # Set page title, icon, and dark theme
-st.set_page_config(page_title="State Release Data Extraction", page_icon=">", layout="wide")
+st.set_page_config(page_title="Data Extraction", page_icon=">", layout="wide")
 
 # CSS for styling
 st.markdown(
