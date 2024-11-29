@@ -37,7 +37,7 @@ if "username" not in st.session_state:
 
 # Configure Google Generative AI with the API key
 #GOOGLE_API_KEY = st.secrets['GEMINI_API_KEY']
-GOOGLE_API_KEY = "AIzaSyAqziwvuuVrKAaME0VOHYTfkRzEowwAtzc"
+GOOGLE_API_KEY = "AIzaSyBjWdpkNA6ZfWLyKFwji6sDdk6hTCE3ObE"
 genai.configure(api_key=GOOGLE_API_KEY)
 
 def hash_password(password):
